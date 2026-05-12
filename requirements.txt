@@ -1,9 +1,3 @@
-torch
-torchvision
-torchaudio
-diffusers
-transformers
-accelerate
-sentencepiece
-safetensors
 streamlit
+huggingface_hub
+Pillow

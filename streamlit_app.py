@@ -118,15 +118,15 @@ def render_sidebar():
         "Model",
         options=list(MODEL_OPTIONS.keys()),
         index=0,
-        help="Use SD-Turbo for faster CPU drafts, or SDXL-Turbo for better quality."
+        help="Use SD-Turbo for speed, or SDXL-Turbo for better quality. Both run on Hugging Face servers."
     )
     if model_label == "CPU Fastest (SD-Turbo)":
         st.sidebar.caption(
-            "Recommended for local CPU use. Balanced or High Quality will be slower, but usually much clearer than Ultra Fast."
+            "Faster generation (~30 sec). Good for quick drafts and prototyping."
         )
     else:
         st.sidebar.caption(
-            "Best when you have GPU access. On CPU this model can be very slow."
+            "Higher quality output (~45-60 sec). Best for final deliverables."
         )
 
     selected_asset_names = st.sidebar.multiselect(

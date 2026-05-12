@@ -1,8 +1,9 @@
 import os
 from pathlib import Path
+from io import BytesIO
 
-import torch
-from diffusers import DiffusionPipeline
+from huggingface_hub import InferenceClient
+from PIL import Image
 
 from src.utils import OUTPUT_DIR, create_output_directory, slugify_filename
 
@@ -29,6 +30,7 @@ def _ensure_output_directory():
 
 
 class ImageGenerator:
+    """Uses Hugging Face Inference API for fast, scalable image generation."""
 
     def __init__(self, model_id: str = "stabilityai/sdxl-turbo"):
         hf_token = _get_hf_token()
@@ -39,32 +41,8 @@ class ImageGenerator:
             )
 
         self.model_id = model_id
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        dtype = torch.float16 if self.device == "cuda" else torch.float32
-
-        self.pipe = DiffusionPipeline.from_pretrained(
-            self.model_id,
-            token=hf_token,
-            torch_dtype=dtype
-        )
-
-        self.pipe.to(self.device)
-
+        self.client = InferenceClient(token=hf_token)
         _ensure_output_directory()
-
-    def _cpu_tuned_settings(self, filename: str, num_inference_steps: int, guidance_scale: float):
-        if self.device != "cpu":
-            return num_inference_steps, guidance_scale
-
-        normalized_name = Path(filename).stem.lower()
-        tuned_steps = max(num_inference_steps, 4)
-        tuned_guidance = max(guidance_scale, 0.8)
-
-        if "logo" in normalized_name:
-            tuned_steps = max(tuned_steps, 6)
-            tuned_guidance = max(tuned_guidance, 1.2)
-
-        return tuned_steps, tuned_guidance
 
     def generate_image(
         self,
@@ -76,27 +54,28 @@ class ImageGenerator:
         num_inference_steps=4,
         guidance_scale=0.0
     ):
-        tuned_steps, tuned_guidance = self._cpu_tuned_settings(
-            filename=filename,
-            num_inference_steps=num_inference_steps,
-            guidance_scale=guidance_scale
-        )
+        """Generate image using Hugging Face Inference API."""
+        try:
+            # Call Hugging Face Inference API
+            image = self.client.text_to_image(
+                prompt=prompt,
+                model=self.model_id,
+                height=height,
+                width=width,
+            )
 
-        image = self.pipe(
-            prompt=prompt,
-            negative_prompt=negative_prompt,
-            width=width,
-            height=height,
-            num_inference_steps=tuned_steps,
-            guidance_scale=tuned_guidance
-        ).images[0]
+            output_name = self._normalize_filename(filename)
+            save_path = OUTPUT_DIR / output_name
 
-        output_name = self._normalize_filename(filename)
-        save_path = OUTPUT_DIR / output_name
+            # Save image
+            if isinstance(image, bytes):
+                Image.open(BytesIO(image)).save(save_path)
+            else:
+                image.save(save_path)
 
-        image.save(save_path)
-
-        return str(save_path)
+            return str(save_path)
+        except Exception as e:
+            raise RuntimeError(f"Image generation failed: {str(e)}")
 
     @staticmethod
     def _normalize_filename(filename: str) -> str:

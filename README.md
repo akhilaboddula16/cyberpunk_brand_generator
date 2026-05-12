@@ -1,8 +1,9 @@
 # Cyberpunk Brand Generator
 
 A Streamlit-based creative tool for generating a five-asset cyberpunk-corporate
-brand pack for a startup rebrand brief. The app uses `stabilityai/sdxl-turbo`
-through Hugging Face Diffusers and focuses on consistent prompt design across:
+brand pack for a startup rebrand brief. The app uses **Hugging Face Inference API** 
+with `stabilityai/sdxl-turbo` for fast, serverless image generation focused on 
+consistent prompt design across:
 
 - Logo concept
 - Hero image
@@ -19,101 +20,216 @@ with a shared palette, lighting direction, and product-marketing tone.
 
 ## Features
 
-- Streamlit UI for generating the full asset pack
-- Editable prompts for each deliverable
-- Shared negative prompt to reduce common image artifacts
-- CLI entrypoint for batch generation
-- Safer startup behavior when `HF_TOKEN` or output folders are missing
+- ⚡ **Streamlit Web UI** with live image generation
+- ✏️ **Editable prompts** for each deliverable  
+- 🎨 **Shared negative prompt** to reduce common image artifacts
+- 🖥️ **CLI entrypoint** for batch generation
+- 🚀 **Serverless deployment** via Hugging Face Inference API
+- 📦 **Cloud-ready** - Deploy on Streamlit Cloud instantly
+- 💾 **Minimal dependencies** - Only 3 packages needed
 
 ## System Requirements
 
 ### Hardware
-
-**CPU (Local Setup)**
-- Minimum: Intel i5 / AMD Ryzen 5 or equivalent
-- Recommended: Multi-core processor for faster generation
-
-**GPU (Recommended for faster performance)**
-- NVIDIA GPU with CUDA support (e.g., RTX 3060, RTX 4090, Tesla T4)
-- 6GB+ VRAM for image generation
-- Not required, but significantly improves generation speed
-
-**Memory (RAM)**
-- Minimum: 8GB RAM
-- Recommended: 16GB+ for smooth operation
+- **Any computer** - No GPU needed! 🎉
+- RAM: 512 MB minimum (2GB+ recommended)
+- Internet connection (for HF API)
 
 ### Software
-
 - Python 3.8+
-- CUDA 11.8+ (if using NVIDIA GPU)
+- pip or conda
 
-### Performance Comparison
+### Performance
 
-| Setup | Generation Time (per image) |
-|-------|---------------------------|
-| CPU only | 5-10 minutes |
-| GPU (RTX 3060) | 30-60 seconds |
-| Google Colab GPU (Tesla T4) | 1-2 minutes |
+| Setup | Generation Time |
+|-------|-----------------|
+| **Local (Any machine)** | 30-60 seconds per image |
+| **Streamlit Cloud** | 30-60 seconds per image |
+| **Google Colab** | 30-60 seconds per image |
 
-**Recommendation**: Use Google Colab for free GPU acceleration if you don't have a local GPU. See [GOOGLE_COLAB.md](GOOGLE_COLAB.md) for setup.
+**✅ No GPU required!** All computation happens on Hugging Face serverless infrastructure.
 
-## Setup
+## Installation
 
-1. Create and activate a virtual environment.
-2. Install dependencies:
+### 1. Clone or Download the Repository
+```bash
+git clone https://github.com/YOUR_USERNAME/cyberpunk_brand_generator.git
+cd cyberpunk_brand_generator
+```
 
+### 2. Create Virtual Environment (Recommended)
+```bash
+python -m venv venv
+
+# Activate it:
+# Windows
+venv\Scripts\activate
+# macOS/Linux
+source venv/bin/activate
+```
+
+### 3. Install Dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Add your Hugging Face token using one of these options:
+That's it! Only 3 packages:
+- `streamlit` - Web UI framework
+- `huggingface_hub` - Inference API client  
+- `Pillow` - Image handling
 
-Option A: environment variable
+### 4. Get Your Hugging Face Token
 
+1. Go to https://huggingface.co/settings/tokens
+2. Click **"New token"**
+3. Select **"Read"** permission
+4. Copy your token
+
+### 5. Add Token (Choose One)
+
+**Option A: Environment Variable**
 ```bash
+# Windows PowerShell
+$env:HF_TOKEN = "your_token_here"
+
+# Windows CMD
 set HF_TOKEN=your_token_here
+
+# macOS/Linux
+export HF_TOKEN=your_token_here
 ```
 
-Option B: Streamlit secrets file
+**Option B: Streamlit Secrets (Recommended for Streamlit Cloud)**
 
-Create `.streamlit/secrets.toml` with:
-
+Create `.streamlit/secrets.toml`:
 ```toml
 HF_TOKEN = "your_token_here"
 ```
 
-## Run The Streamlit App
+## Run Locally
 
-### Local Setup
+### Streamlit Web App
 ```bash
 streamlit run streamlit_app.py
 ```
 
-### Google Colab (with GPU Support)
+The app will open at `http://localhost:8501`
 
-For faster image generation with GPU acceleration, run on Google Colab:
-
-1. Upload your project files to Colab
-2. Install dependencies
-3. Set your Hugging Face token
-4. Run with Streamlit headless mode
-
-See [GOOGLE_COLAB.md](GOOGLE_COLAB.md) for detailed step-by-step instructions.
-
-## Run The CLI Version
-
+### CLI Batch Generation
 ```bash
 python app.py
 ```
 
-## Output
+Generated images are saved in `generated_assets/`
 
-Generated images are saved in the `generated_assets/` directory.
+## Deploy to Streamlit Cloud
 
-## Suggested Demo Flow
+See [STREAMLIT_DEPLOYMENT.md](STREAMLIT_DEPLOYMENT.md) for step-by-step instructions.
 
-1. Launch the Streamlit app.
-2. Review the brand brief in the sidebar.
-3. Adjust prompts, filenames, or aspect ratios per asset if needed.
-4. Generate the full five-image pack.
-5. Download each asset from the results section.
+**TL;DR:**
+1. Push to GitHub
+2. Go to https://streamlit.io/cloud
+3. Click "New app" and select this repo
+4. Add `HF_TOKEN` in Secrets
+5. Done! ✨
+
+---
+
+## Architecture
+
+### How It Works
+
+```
+User Input (Streamlit UI)
+    ↓
+ImageGenerator Class
+    ↓
+Hugging Face Inference API
+    ↓
+Stable Diffusion SDXL-Turbo
+    ↓
+Generated Image (PNG)
+    ↓
+Save to generated_assets/
+```
+
+### Key Components
+
+| File | Purpose |
+|------|---------|
+| `streamlit_app.py` | Interactive web UI |
+| `app.py` | CLI batch generator |
+| `src/generator.py` | HF Inference API client |
+| `src/prompts.py` | Brand prompts & assets config |
+| `src/utils.py` | Helper functions |
+
+### Why Hugging Face Inference API?
+
+✅ **No GPU needed** - Computation on HF servers  
+✅ **Fast startup** - 10-15 seconds, no model download  
+✅ **Scalable** - Works on any machine  
+✅ **Free tier** - 1,000 API calls/month included  
+✅ **Production-ready** - Works on Streamlit Cloud  
+
+---
+
+## Troubleshooting
+
+### "HF_TOKEN not found"
+Make sure you've set the token in either:
+- Environment variable: `HF_TOKEN=your_token`
+- Streamlit secrets: `.streamlit/secrets.toml`
+
+### "Rate limit exceeded"
+- You've hit the free tier limit (1,000 calls/month)
+- Wait 1 hour or upgrade at https://huggingface.co/billing
+
+### "Image generation failed"
+- Check your HF token is valid: https://huggingface.co/settings/tokens
+- Make sure you have internet connection
+- Check HF service status: https://status.huggingface.co
+
+### App shows "Running..." forever
+- Check Streamlit logs for errors
+- Verify `HF_TOKEN` is set correctly
+- Try restarting the app
+
+---
+
+## File Structure
+
+```
+cyberpunk_brand_generator/
+├── app.py                 # CLI entry point
+├── streamlit_app.py       # Streamlit UI
+├── main.py                # Alternative entry
+├── requirements.txt       # Dependencies (3 packages)
+├── README.md             # This file
+├── STREAMLIT_DEPLOYMENT.md  # Cloud deployment guide
+├── linkedin.md           # LinkedIn post template
+├── interview.md          # Interview prep guide
+├── generated_assets/     # Output folder (auto-created)
+└── src/
+    ├── generator.py      # HF Inference API wrapper
+    ├── prompts.py        # Brand prompts configuration
+    └── utils.py          # Helper functions
+```
+
+---
+
+## License
+
+MIT - Feel free to use and modify!
+
+---
+
+## Resources
+
+- **Hugging Face Docs:** https://huggingface.co/docs/api-inference
+- **Streamlit Docs:** https://docs.streamlit.io
+- **Stable Diffusion:** https://huggingface.co/stabilityai/sdxl-turbo
+- **Deployment Guide:** [STREAMLIT_DEPLOYMENT.md](STREAMLIT_DEPLOYMENT.md)
+
+---
+
+**Happy generating! 🚀**

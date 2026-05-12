@@ -1,0 +1,20 @@
+[project]
+name = "cybetounk-brand-generator"
+version = "0.1.0"
+description = "Generate a cyberpunk-corporate brand pack with Streamlit and SDXL Turbo."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "accelerate",
+    "diffusers",
+    "safetensors",
+    "sentencepiece",
+    "streamlit",
+    "torch",
+    "torchaudio",
+    "torchvision",
+    "transformers",
+]
+
+[project.scripts]
+cyberpunk-brand-cli = "app:main"

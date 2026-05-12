@@ -1,0 +1,25 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+.venv/
+__pycache__/
+outputs/
+generated_assets/
+*.pyc
+.env
+.streamlit/secrets.toml
+streamlit.log
+streamlit.err.log
+streamlit/
+.DS_Store
+generated_assets/
+outputs/
+*.png
+*.jpg
